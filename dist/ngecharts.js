@@ -21,15 +21,34 @@
     function buildLinkFunc($window) {
         return function (scope, ele, attrs) {
             var chart, options;
-            chart = echarts.init(ele[0], 'macarons'); 
+            var chartEvent = {};
+            chart = echarts.init(ele[0], 'macarons');
 
             createChart(scope.options);
 
             function createChart(options) {
                 if (!options) return;
 
-                chart.setOption(options); 
+                chart.setOption(options);
                 // scope.$emit('create', chart);
+
+                if (options.event) {
+                    if (!Array.isArray(options.event)) {
+                        options.event = [options.event];
+                    }
+
+                    if (Array.isArray(options.event)) {
+                        options.event.forEach(function (ele) {
+                            if(!chartEvent[ele.type]) {
+                                chartEvent[ele.type] = true;
+                                chart.on(ele.type, function (param) {
+                                    ele.fn(param);
+                                    scope.$digest();
+                                });
+                            }
+                        });
+                    }
+                }
 
                 angular.element($window).bind('resize', function(){
                     chart.resize();
@@ -42,7 +61,7 @@
                 createChart(newVal);
             })
 
-            
+
         };
     }
 
