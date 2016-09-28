@@ -21,7 +21,6 @@
     function buildLinkFunc($window) {
         return function (scope, ele, attrs) {
             var chart, options;
-            var chartEvent = {};
             chart = echarts.init(ele[0], 'macarons');
 
             createChart(scope.options);
@@ -29,7 +28,8 @@
             function createChart(options) {
                 if (!options) return;
 
-                chart.setOption(options); 
+                var chartEvent = {};
+                chart.setOption(options, false);
                 // scope.$emit('create', chart);
 
                 if (options.event) {
@@ -43,7 +43,7 @@
                                 chartEvent[ele.type] = true;
                                 chart.on(ele.type, function (param) {
                                     ele.fn(param);
-                                    scope.$digest();
+                                    scope.$apply();
                                 });
                             }
                         });
@@ -58,6 +58,7 @@
 
             scope.$watch('options', function (newVal, oldVal) {
                 if (angular.equals(newVal, oldVal)) return;
+                options = newVal;
                 createChart(newVal);
             })
 
